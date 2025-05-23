@@ -11,14 +11,22 @@ dependencies:
     sdk: flutter
   firebase_core: ^2.24.2
   firebase_auth: ^4.15.3
+  google_maps_flutter: ^2.5.3
+  geolocator: ^10.1.0
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^5.0.0
   firebase_core_platform_interface: ^5.0.0
-  mockito: ^5.4.4
-  build_runner: ^2.4.8
+  mockito: ^5.4.6
+  build_runner: ^2.4.14
+  flutter_driver:
+    sdk: flutter
+  integration_test:
+    sdk: flutter
+  test: ^1.24.0
+  mockingjay: ^1.0.0
 
 flutter:
   uses-material-design: true

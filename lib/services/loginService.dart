@@ -1,7 +1,9 @@
 import 'package:firebase_auth/firebase_auth.dart';
 
 class LoginService {
-  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final FirebaseAuth _auth;
+
+  LoginService([FirebaseAuth? auth]) : _auth = auth ?? FirebaseAuth.instance;
 
   // Sign in with phone and password
   Future<User?> signInWithPhoneAndPassword(

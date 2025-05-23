@@ -2,8 +2,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
-import '../../pages/login.dart';
-import '../../services/loginService.dart';
+import 'package:triplo/pages/login.dart';
+import 'package:triplo/services/loginService.dart';
 
 class MockLoginService implements LoginService {
   final calls = <String, List<List<dynamic>>>{};
@@ -62,7 +62,19 @@ void main() {
   });
 
   Widget createWidgetUnderTest() {
-    return MaterialApp(home: LoginPage(loginService: mockLoginService));
+    return MaterialApp(
+      home: Scaffold(
+        body: Container(
+          width: 800,
+          height: 600,
+          child: Column(
+            children: [
+              Expanded(child: LoginPage(loginService: mockLoginService)),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   testWidgets('LoginPage renders phone, password fields and buttons', (
@@ -71,7 +83,7 @@ void main() {
     await tester.pumpWidget(createWidgetUnderTest());
 
     expect(find.byType(TextField), findsNWidgets(2));
-    expect(find.text('Phone number'), findsOneWidget);
+    expect(find.text('Phone'), findsOneWidget);
     expect(find.text('Password'), findsOneWidget);
     expect(find.text('Log In'), findsOneWidget);
     expect(find.text('Create new account'), findsOneWidget);
@@ -81,8 +93,16 @@ void main() {
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(createWidgetUnderTest());
-    await tester.enterText(find.byType(TextField).at(0), '+1234567890');
-    await tester.enterText(find.byType(TextField).at(1), 'password123');
+    await tester.enterText(find.byKey(const Key('phone_field')), '+1234567890');
+    await tester.enterText(
+      find.byKey(const Key('password_field')),
+      'password123',
+    );
+    await tester.dragUntilVisible(
+      find.text('Create new account'),
+      find.byType(SingleChildScrollView),
+      const Offset(0, 50),
+    );
     await tester.tap(find.text('Create new account'));
     await tester.pump();
 
@@ -100,8 +120,11 @@ void main() {
   ) async {
     await tester.pumpWidget(createWidgetUnderTest());
 
-    await tester.enterText(find.byType(TextField).at(0), '+1234567890');
-    await tester.enterText(find.byType(TextField).at(1), 'password123');
+    await tester.enterText(find.byKey(const Key('phone_field')), '+1234567890');
+    await tester.enterText(
+      find.byKey(const Key('password_field')),
+      'password123',
+    );
     await tester.tap(find.text('Log In'));
     await tester.pump();
 

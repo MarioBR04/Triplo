@@ -43,6 +43,8 @@ class _LoginPageState extends State<LoginPage> {
       _isLoading = false;
       if (user == null) {
         _errorMessage = 'Invalid phone or password';
+      } else {
+        Navigator.of(context).pushReplacementNamed('/home');
       }
     });
   }
@@ -84,6 +86,16 @@ class _LoginPageState extends State<LoginPage> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Image.asset('assets/images/logo.png', width: 200, height: 200),
+                const SizedBox(height: 24),
+                const Text(
+                  'Welcome back!',
+                  style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.darkBlueGray,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
                 const SizedBox(height: 48),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -91,7 +103,7 @@ class _LoginPageState extends State<LoginPage> {
                     const Padding(
                       padding: EdgeInsets.only(left: 4, bottom: 8),
                       child: Text(
-                        'Phone number',
+                        'Phone',
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w500,
@@ -99,6 +111,7 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                     ),
                     TextField(
+                      key: const Key('phone_field'),
                       controller: _phoneController,
                       decoration: InputDecoration(
                         hintText: '+1234567890',
@@ -127,6 +140,7 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                     ),
                     TextField(
+                      key: const Key('password_field'),
                       controller: _passwordController,
                       decoration: InputDecoration(
                         hintText: 'Enter your password',
