@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "937278569388",
+    "project_id": "triplo-f63c3",
+    "storage_bucket": "triplo-f63c3.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:937278569388:android:f2f5f6d1ff2ddec3d81809",
+        "android_client_info": {
+          "package_name": "com.example.triplo"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD1sX5MqtduamFWfoRNPNGrtaAo0J4UZ0s"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
