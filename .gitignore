@@ -122,3 +122,4 @@ lib/firebase_options.dart
 android/app/google-services.json
 macos/Runner/GoogleService-Info.plist
 ios/Runner/GoogleService-Info.plist
+lib/core/config.dart

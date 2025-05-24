@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../core/constants.dart';
 import '../services/loginService.dart';
+import '../pages/home.dart';
 
 class Sidebar extends StatelessWidget {
   final LoginService loginService;
@@ -13,13 +14,17 @@ class Sidebar extends StatelessWidget {
       child: Container(
         color: Colors.white,
         child: ListView(
-          padding: EdgeInsets.zero,
+          padding: EdgeInsets.fromLTRB(0, 0, 0, 0),
           children: [
-            DrawerHeader(
+            Container(
+              height: 120,
+              padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(color: AppColors.blue),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
+                  const SizedBox(height: 16),
                   const Text(
                     'triplo',
                     style: TextStyle(
@@ -28,7 +33,8 @@ class Sidebar extends StatelessWidget {
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  const Spacer(),
+                  const SizedBox(height: 6),
+
                   GestureDetector(
                     onTap: () {
                       // Navigate to profile page
@@ -37,7 +43,12 @@ class Sidebar extends StatelessWidget {
                       children: [
                         const CircleAvatar(
                           backgroundColor: Colors.white,
-                          child: Icon(Icons.person, color: AppColors.blue),
+                          radius: 16,
+                          child: Icon(
+                            Icons.person,
+                            color: AppColors.blue,
+                            size: 20,
+                          ),
                         ),
                         const SizedBox(width: 8),
                         Text(
@@ -58,8 +69,11 @@ class Sidebar extends StatelessWidget {
               leading: const Icon(Icons.add_circle_outline),
               title: const Text('New Trip'),
               onTap: () {
-                Navigator.pop(context);
-                // Navigate to new trip page
+                // Navigate to homePage
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const HomePage()),
+                );
               },
             ),
             ListTile(
