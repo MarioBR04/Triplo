@@ -7,9 +7,7 @@ class MessageService {
     return ids.join('_');
   }
 
-  static Future<void> updateExistingMessages() async {
-    // This method is now handled by individual chat pages
-  }
+  static Future<void> updateExistingMessages() async {}
 
   static Future<void> sendMessage({
     required String sender,

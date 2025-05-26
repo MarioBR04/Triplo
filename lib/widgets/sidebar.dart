@@ -3,7 +3,13 @@ import '../core/constants.dart';
 import '../services/loginService.dart';
 import '../pages/home.dart';
 import '../pages/messages_page.dart';
+import '../pages/schedule_trip_page.dart';
+import '../pages/travel_history_page.dart';
+import '../pages/settings_page.dart';
+import '../pages/profile_page.dart';
+import '../pages/driver_mode_page.dart';
 
+// Menú lateral de la aplicación
 class Sidebar extends StatelessWidget {
   final LoginService loginService;
 
@@ -13,10 +19,11 @@ class Sidebar extends StatelessWidget {
   Widget build(BuildContext context) {
     return Drawer(
       child: Container(
-        color: Colors.white,
+        color: AppColors.white,
         child: ListView(
-          padding: EdgeInsets.fromLTRB(0, 0, 0, 0),
+          padding: EdgeInsets.zero,
           children: [
+            // Encabezado del menú con logo y perfil
             Container(
               height: 120,
               padding: const EdgeInsets.all(16),
@@ -29,21 +36,26 @@ class Sidebar extends StatelessWidget {
                   const Text(
                     'triplo',
                     style: TextStyle(
-                      color: Colors.white,
+                      color: AppColors.white,
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
                   const SizedBox(height: 6),
-
+                  // Información del usuario actual
                   GestureDetector(
                     onTap: () {
-                      // Navigate to profile page
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const ProfilePage(),
+                        ),
+                      );
                     },
                     child: Row(
                       children: [
                         const CircleAvatar(
-                          backgroundColor: Colors.white,
+                          backgroundColor: AppColors.white,
                           radius: 16,
                           child: Icon(
                             Icons.person,
@@ -56,7 +68,7 @@ class Sidebar extends StatelessWidget {
                           loginService.getCurrentUser()?.email?.split('@')[0] ??
                               'User',
                           style: const TextStyle(
-                            color: Colors.white,
+                            color: AppColors.white,
                             fontSize: 16,
                           ),
                         ),
@@ -66,11 +78,17 @@ class Sidebar extends StatelessWidget {
                 ],
               ),
             ),
+            // Opciones principales del menú
             ListTile(
-              leading: const Icon(Icons.add_circle_outline),
-              title: const Text('New Trip'),
+              leading: const Icon(
+                Icons.add_circle_outline,
+                color: AppColors.blue,
+              ),
+              title: const Text(
+                'New Trip',
+                style: TextStyle(color: AppColors.deepBlue),
+              ),
               onTap: () {
-                // Navigate to homePage
                 Navigator.push(
                   context,
                   MaterialPageRoute(builder: (context) => const HomePage()),
@@ -78,48 +96,88 @@ class Sidebar extends StatelessWidget {
               },
             ),
             ListTile(
-              leading: const Icon(Icons.schedule),
-              title: const Text('Schedule Trip'),
+              leading: const Icon(Icons.schedule, color: AppColors.blue),
+              title: const Text(
+                'Schedule Trip',
+                style: TextStyle(color: AppColors.deepBlue),
+              ),
               onTap: () {
-                Navigator.pop(context);
-                // Navigate to schedule trip page
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const ScheduleTripPage(),
+                  ),
+                );
               },
             ),
             ListTile(
-              leading: const Icon(Icons.history),
-              title: const Text('Travel History'),
+              leading: const Icon(Icons.history, color: AppColors.blue),
+              title: const Text(
+                'Travel History',
+                style: TextStyle(color: AppColors.deepBlue),
+              ),
               onTap: () {
-                Navigator.pop(context);
-                // Navigate to travel history page
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const TravelHistoryPage(),
+                  ),
+                );
               },
             ),
             ListTile(
-              leading: const Icon(Icons.settings),
-              title: const Text('Settings'),
+              leading: const Icon(Icons.settings, color: AppColors.blue),
+              title: const Text(
+                'Settings',
+                style: TextStyle(color: AppColors.deepBlue),
+              ),
               onTap: () {
-                Navigator.pop(context);
-                // Navigate to settings page
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const SettingsPage()),
+                );
               },
             ),
             ListTile(
-              leading: const Icon(Icons.person_outline),
-              title: const Text('My Profile'),
+              leading: const Icon(Icons.person_outline, color: AppColors.blue),
+              title: const Text(
+                'My Profile',
+                style: TextStyle(color: AppColors.deepBlue),
+              ),
               onTap: () {
-                Navigator.pop(context);
-                // Navigate to profile page
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const ProfilePage()),
+                );
               },
             ),
             ListTile(
-              leading: const Icon(Icons.drive_eta_outlined),
-              title: const Text('Driver Mode'),
+              leading: const Icon(
+                Icons.drive_eta_outlined,
+                color: AppColors.blue,
+              ),
+              title: const Text(
+                'Driver Mode',
+                style: TextStyle(color: AppColors.deepBlue),
+              ),
               onTap: () {
-                Navigator.pop(context);
-                // Navigate to driver mode page
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const DriverModePage(),
+                  ),
+                );
               },
             ),
             ListTile(
-              leading: const Icon(Icons.message_outlined),
-              title: const Text('Messages'),
+              leading: const Icon(
+                Icons.message_outlined,
+                color: AppColors.blue,
+              ),
+              title: const Text(
+                'Messages',
+                style: TextStyle(color: AppColors.deepBlue),
+              ),
               onTap: () {
                 Navigator.push(
                   context,
@@ -130,10 +188,14 @@ class Sidebar extends StatelessWidget {
                 );
               },
             ),
-            const Divider(),
+            const Divider(color: AppColors.lightGray),
+            // Opción para cerrar sesión
             ListTile(
-              leading: const Icon(Icons.logout),
-              title: const Text('Sign Out'),
+              leading: const Icon(Icons.logout, color: AppColors.blue),
+              title: const Text(
+                'Sign Out',
+                style: TextStyle(color: AppColors.deepBlue),
+              ),
               onTap: () async {
                 await loginService.signOut();
                 if (context.mounted) {

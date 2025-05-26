@@ -8,8 +8,10 @@ import 'package:google_maps_webservice/directions.dart' as maps_directions;
 import '../core/constants.dart';
 import '../core/config.dart';
 import '../services/loginService.dart';
+import '../services/driver_service.dart';
 import '../widgets/sidebar.dart';
 
+// Página principal con el mapa y búsqueda de viajes
 class HomePage extends StatefulWidget {
   final LoginService? loginService;
 
@@ -28,6 +30,8 @@ class _HomePageState extends State<HomePage> {
   bool _isLoading = true;
   String? _errorMessage;
   Set<Marker> _markers = {};
+
+  // Servicios de Google Maps para lugares y direcciones
   final places = maps_webservice.GoogleMapsPlaces(
     apiKey: Config.googleMapsApiKey,
   );
@@ -42,43 +46,49 @@ class _HomePageState extends State<HomePage> {
     _getCurrentLocation();
   }
 
+  // Obtiene la ubicación actual del usuario
   Future<void> _getCurrentLocation() async {
-    bool serviceEnabled;
-    LocationPermission permission;
-
-    serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    if (!serviceEnabled) {
-      return;
+    try {
+      final position = await Geolocator.getCurrentPosition();
+      setState(() {
+        _currentPosition = position;
+        _isLoading = false;
+        _markers = {..._getDriverMarkers()};
+      });
+      _moveCamera();
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+        _errorMessage = 'Error al obtener la ubicación';
+      });
     }
-
-    permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-      if (permission == LocationPermission.denied) {
-        return;
-      }
-    }
-
-    if (permission == LocationPermission.deniedForever) {
-      return;
-    }
-
-    final position = await Geolocator.getCurrentPosition();
-    setState(() {
-      _currentPosition = position;
-      _isLoading = false;
-    });
-
-    _mapController?.animateCamera(
-      CameraUpdate.newCameraPosition(
-        CameraPosition(
-          target: LatLng(position.latitude, position.longitude),
-          zoom: 15,
-        ),
-      ),
-    );
   }
 
+  // Obtiene los marcadores de conductores cercanos
+  Set<Marker> _getDriverMarkers() {
+    return DriverService.getDriverMarkers((driver) {
+      DriverService.showDriverInfo(context, driver);
+    });
+  }
+
+  // Centra el mapa en la ubicación actual
+  void _moveCamera() {
+    if (_currentPosition != null && _mapController != null) {
+      _mapController!.animateCamera(
+        CameraUpdate.newCameraPosition(
+          CameraPosition(
+            target: LatLng(
+              _currentPosition!.latitude,
+              _currentPosition!.longitude,
+            ),
+            zoom: 13,
+          ),
+        ),
+      );
+    }
+  }
+
+  // Maneja la selección de un lugar de destino
   Future<void> _onPlaceSelected(Prediction prediction) async {
     final details = await places.getDetailsByPlaceId(prediction.placeId!);
     if (details.result.geometry?.location != null) {
@@ -105,6 +115,7 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+  // Calcula la distancia entre la ubicación actual y el destino
   Future<String> _calculateDistance(LatLng destination) async {
     try {
       final result = await directions.directionsWithLocation(
@@ -131,11 +142,13 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+  // Inicia la búsqueda de un conductor
   void _findDriver() async {
     setState(() {
       _errorMessage = null;
     });
 
+    // Validación de campos
     if (_destinationController.text.isEmpty) {
       setState(() {
         _errorMessage = 'Please enter a destination';
@@ -150,7 +163,7 @@ class _HomePageState extends State<HomePage> {
       return;
     }
 
-    // Show loading dialog
+    // Muestra diálogo de carga
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -163,20 +176,18 @@ class _HomePageState extends State<HomePage> {
       },
     );
 
-    // Get distance
+    // Calcula la distancia del viaje
     String distance = '-- km';
     if (_markers.isNotEmpty) {
       final destination = _markers.first.position;
       distance = await _calculateDistance(destination);
     }
 
-    // Simulate driver search delay
+    // Simula búsqueda de conductor
     await Future.delayed(const Duration(seconds: 4));
-
-    // Close loading dialog
     Navigator.of(context).pop();
 
-    // Show driver found dialog
+    // Muestra diálogo de conductor encontrado
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -245,7 +256,7 @@ class _HomePageState extends State<HomePage> {
               ),
               onPressed: () {
                 Navigator.of(context).pop();
-                // Aquí podrías navegar a una pantalla de detalles del viaje
+                // TODO: Implementar navegación a detalles del viaje
               },
               child: const Text('Accept Ride'),
             ),
@@ -257,6 +268,35 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    // Muestra pantalla de carga
+    if (_isLoading) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
+
+    // Muestra pantalla de error
+    if (_errorMessage != null) {
+      return Scaffold(
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(_errorMessage!),
+              const SizedBox(height: 16),
+              ElevatedButton(
+                onPressed: () {
+                  setState(() {
+                    _errorMessage = null;
+                  });
+                },
+                child: const Text('Volver a intentar'),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    // Construye la interfaz principal
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.white,
@@ -280,25 +320,35 @@ class _HomePageState extends State<HomePage> {
       drawer: Sidebar(loginService: _loginService),
       body: Stack(
         children: [
-          if (_isLoading)
-            const Center(child: CircularProgressIndicator())
-          else if (_currentPosition != null)
-            GoogleMap(
-              initialCameraPosition: CameraPosition(
-                target: LatLng(
-                  _currentPosition!.latitude,
-                  _currentPosition!.longitude,
-                ),
-                zoom: 15,
+          // Mapa de Google
+          GoogleMap(
+            initialCameraPosition: CameraPosition(
+              target: LatLng(
+                _currentPosition?.latitude ?? 37.7749,
+                _currentPosition?.longitude ?? -122.4194,
               ),
-              myLocationEnabled: true,
-              myLocationButtonEnabled: true,
-              zoomControlsEnabled: false,
-              markers: _markers,
-              onMapCreated: (controller) {
-                _mapController = controller;
-              },
+              zoom: 13,
             ),
+            myLocationEnabled: true,
+            myLocationButtonEnabled: true,
+            markers: _markers,
+            onMapCreated: (controller) {
+              _mapController = controller;
+              setState(() {
+                _markers = {
+                  Marker(
+                    markerId: const MarkerId('current_location'),
+                    position: LatLng(
+                      _currentPosition?.latitude ?? 37.7749,
+                      _currentPosition?.longitude ?? -122.4194,
+                    ),
+                  ),
+                  ..._getDriverMarkers(),
+                };
+              });
+            },
+          ),
+          // Panel de búsqueda
           Positioned(
             top: 16,
             left: 16,
@@ -321,6 +371,7 @@ class _HomePageState extends State<HomePage> {
                       ),
                     ),
                     const SizedBox(height: 8),
+                    // Campo de búsqueda de destino
                     GooglePlaceAutoCompleteTextField(
                       textEditingController: _destinationController,
                       googleAPIKey: Config.googleMapsApiKey,
@@ -333,7 +384,7 @@ class _HomePageState extends State<HomePage> {
                         ),
                       ),
                       debounceTime: 800,
-                      countries: const ["mx"],
+                      countries: const ["us"],
                       isLatLngRequired: true,
                       getPlaceDetailWithLatLng: (Prediction prediction) {
                         _onPlaceSelected(prediction);
@@ -342,7 +393,6 @@ class _HomePageState extends State<HomePage> {
                         _onPlaceSelected(prediction);
                       },
                       seperatedBuilder: const Divider(),
-                      // optional
                       itemBuilder: (context, index, Prediction prediction) {
                         return Container(
                           padding: const EdgeInsets.all(10),
@@ -360,6 +410,7 @@ class _HomePageState extends State<HomePage> {
                       isCrossBtnShown: true,
                     ),
                     const SizedBox(height: 16),
+                    // Campo de número de pasajeros
                     const Text(
                       'How many are you?',
                       style: TextStyle(
@@ -396,6 +447,7 @@ class _HomePageState extends State<HomePage> {
           ),
         ],
       ),
+      // Botón para buscar conductor
       floatingActionButton: FloatingActionButton.extended(
         onPressed: _findDriver,
         label: const Text('Find Driver'),

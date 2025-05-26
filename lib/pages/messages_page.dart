@@ -40,7 +40,6 @@ class _MessagesPageState extends State<MessagesPage> {
           final messages = snapshot.data?.docs ?? [];
           print('Number of messages: ${messages.length}');
 
-          // Get unique conversation partners and their last messages
           final Map<String, QueryDocumentSnapshot> lastMessages = {};
 
           for (var doc in messages) {

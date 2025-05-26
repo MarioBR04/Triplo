@@ -42,13 +42,11 @@ class _ChatPageState extends State<ChatPage> {
   }
 
   Stream<QuerySnapshot> _getMessages() {
-    // Query for messages where current user is sender
     final Query query1 = FirebaseFirestore.instance
         .collection('messages')
         .where('sender', isEqualTo: widget.currentUser)
         .where('receiver', isEqualTo: widget.otherUser);
 
-    // Query for messages where current user is receiver
     final Query query2 = FirebaseFirestore.instance
         .collection('messages')
         .where('sender', isEqualTo: widget.otherUser)
@@ -67,7 +65,6 @@ class _ChatPageState extends State<ChatPage> {
   Future<void> _updateMessagesWithConversationId() async {
     final String conversationId = '${widget.currentUser}_${widget.otherUser}';
 
-    // Update messages where current user is sender
     final QuerySnapshot senderMessages =
         await FirebaseFirestore.instance
             .collection('messages')
@@ -79,7 +76,6 @@ class _ChatPageState extends State<ChatPage> {
       await doc.reference.update({'conversationId': conversationId});
     }
 
-    // Update messages where current user is receiver
     final QuerySnapshot receiverMessages =
         await FirebaseFirestore.instance
             .collection('messages')

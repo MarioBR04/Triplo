@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../services/loginService.dart';
 import '../core/constants.dart';
 
+// Página de inicio de sesión
 class LoginPage extends StatefulWidget {
   final LoginService? loginService;
   const LoginPage({Key? key, this.loginService}) : super(key: key);
@@ -23,6 +24,7 @@ class _LoginPageState extends State<LoginPage> {
     _loginService = widget.loginService ?? LoginService();
   }
 
+  // Maneja el proceso de inicio de sesión
   Future<void> _login() async {
     if (_phoneController.text.isEmpty || _passwordController.text.isEmpty) {
       setState(() => _errorMessage = 'Please enter both phone and password');
@@ -49,6 +51,7 @@ class _LoginPageState extends State<LoginPage> {
     });
   }
 
+  // Maneja el proceso de registro de nuevo usuario
   Future<void> _register() async {
     if (_phoneController.text.isEmpty || _passwordController.text.isEmpty) {
       setState(() => _errorMessage = 'Please enter both phone and password');
@@ -85,6 +88,7 @@ class _LoginPageState extends State<LoginPage> {
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
+                // Logo de la aplicación
                 Image.asset('assets/images/logo.png', width: 200, height: 200),
                 const SizedBox(height: 24),
                 const Text(
@@ -97,6 +101,7 @@ class _LoginPageState extends State<LoginPage> {
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 48),
+                // Campo de teléfono
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -114,7 +119,7 @@ class _LoginPageState extends State<LoginPage> {
                       key: const Key('phone_field'),
                       controller: _phoneController,
                       decoration: InputDecoration(
-                        hintText: '+1234567890',
+                        hintText: 'Enter your phone number',
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8),
                         ),
@@ -126,6 +131,7 @@ class _LoginPageState extends State<LoginPage> {
                   ],
                 ),
                 const SizedBox(height: 16),
+                // Campo de contraseña
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -155,6 +161,7 @@ class _LoginPageState extends State<LoginPage> {
                   ],
                 ),
                 const SizedBox(height: 24),
+                // Mensaje de error si existe
                 if (_errorMessage != null)
                   Padding(
                     padding: const EdgeInsets.only(bottom: 12.0),
@@ -163,6 +170,7 @@ class _LoginPageState extends State<LoginPage> {
                       style: const TextStyle(color: Colors.red),
                     ),
                   ),
+                // Botón de inicio de sesión
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.blue,
@@ -194,6 +202,7 @@ class _LoginPageState extends State<LoginPage> {
                           ),
                 ),
                 const SizedBox(height: 16),
+                // Botón para crear nueva cuenta
                 TextButton(
                   onPressed: _isLoading ? null : _register,
                   child: const Text(
