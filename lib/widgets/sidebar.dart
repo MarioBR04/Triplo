@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../core/constants.dart';
 import '../services/loginService.dart';
 import '../pages/home.dart';
+import '../pages/messages_page.dart';
 
 class Sidebar extends StatelessWidget {
   final LoginService loginService;
@@ -120,8 +121,13 @@ class Sidebar extends StatelessWidget {
               leading: const Icon(Icons.message_outlined),
               title: const Text('Messages'),
               onTap: () {
-                Navigator.pop(context);
-                // Navigate to messages page
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder:
+                        (context) => MessagesPage(loginService: loginService),
+                  ),
+                );
               },
             ),
             const Divider(),
