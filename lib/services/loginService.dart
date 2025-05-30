@@ -29,11 +29,11 @@ class LoginService {
     String password,
   ) async {
     try {
-      UserCredential userCredential = await _auth
-          .createUserWithEmailAndPassword(
-            email: "$phone@triplo.com", // Usa el teléfono como parte del email
-            password: password,
-          );
+      UserCredential userCredential =
+          await _auth.createUserWithEmailAndPassword(
+        email: "$phone@triplo.com", // Usa el teléfono como parte del email
+        password: password,
+      );
       return userCredential.user;
     } on FirebaseAuthException catch (e) {
       print('Error de registro: ${e.code} - ${e.message}');

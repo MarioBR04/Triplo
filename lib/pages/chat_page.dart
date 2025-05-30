@@ -5,21 +5,28 @@ import '../services/messageService.dart';
 class ChatPage extends StatefulWidget {
   final String currentUser;
   final String otherUser;
+  final FirebaseFirestore? firestore;
 
-  const ChatPage({Key? key, required this.currentUser, required this.otherUser})
-    : super(key: key);
+  const ChatPage({
+    Key? key,
+    required this.currentUser,
+    required this.otherUser,
+    this.firestore,
+  }) : super(key: key);
 
   @override
   State<ChatPage> createState() => _ChatPageState();
 }
 
 class _ChatPageState extends State<ChatPage> {
+  late MessageService _messageService;
   final TextEditingController _messageController = TextEditingController();
+  String? _errorMessage;
 
   @override
   void initState() {
     super.initState();
-    MessageService.updateExistingMessages();
+    _messageService = MessageService(firestore: widget.firestore);
     _updateMessagesWithConversationId();
   }
 
@@ -32,56 +39,47 @@ class _ChatPageState extends State<ChatPage> {
   Future<void> _sendMessage() async {
     if (_messageController.text.trim().isEmpty) return;
 
-    await MessageService.sendMessage(
-      sender: widget.currentUser,
-      receiver: widget.otherUser,
-      message: _messageController.text.trim(),
-    );
-
-    _messageController.clear();
+    try {
+      await _messageService.sendMessage(
+        sender: widget.currentUser,
+        receiver: widget.otherUser,
+        message: _messageController.text.trim(),
+      );
+      _messageController.clear();
+      setState(() => _errorMessage = null);
+    } catch (e) {
+      setState(() => _errorMessage = e.toString());
+    }
   }
 
   Stream<QuerySnapshot> _getMessages() {
-    final Query query1 = FirebaseFirestore.instance
-        .collection('messages')
-        .where('sender', isEqualTo: widget.currentUser)
-        .where('receiver', isEqualTo: widget.otherUser);
-
-    final Query query2 = FirebaseFirestore.instance
-        .collection('messages')
-        .where('sender', isEqualTo: widget.otherUser)
-        .where('receiver', isEqualTo: widget.currentUser);
-
-    return FirebaseFirestore.instance
-        .collection('messages')
-        .where(
-          'conversationId',
-          isEqualTo: '${widget.currentUser}_${widget.otherUser}',
-        )
-        .orderBy('timestamp', descending: true)
-        .snapshots();
+    try {
+      return _messageService.getMessages(widget.currentUser, widget.otherUser);
+    } catch (e) {
+      setState(() => _errorMessage = e.toString());
+      // Return an empty stream that completes immediately
+      return Stream.empty();
+    }
   }
 
   Future<void> _updateMessagesWithConversationId() async {
     final String conversationId = '${widget.currentUser}_${widget.otherUser}';
 
-    final QuerySnapshot senderMessages =
-        await FirebaseFirestore.instance
-            .collection('messages')
-            .where('sender', isEqualTo: widget.currentUser)
-            .where('receiver', isEqualTo: widget.otherUser)
-            .get();
+    final QuerySnapshot senderMessages = await FirebaseFirestore.instance
+        .collection('messages')
+        .where('sender', isEqualTo: widget.currentUser)
+        .where('receiver', isEqualTo: widget.otherUser)
+        .get();
 
     for (var doc in senderMessages.docs) {
       await doc.reference.update({'conversationId': conversationId});
     }
 
-    final QuerySnapshot receiverMessages =
-        await FirebaseFirestore.instance
-            .collection('messages')
-            .where('sender', isEqualTo: widget.otherUser)
-            .where('receiver', isEqualTo: widget.currentUser)
-            .get();
+    final QuerySnapshot receiverMessages = await FirebaseFirestore.instance
+        .collection('messages')
+        .where('sender', isEqualTo: widget.otherUser)
+        .where('receiver', isEqualTo: widget.currentUser)
+        .get();
 
     for (var doc in receiverMessages.docs) {
       await doc.reference.update({'conversationId': conversationId});
@@ -90,6 +88,15 @@ class _ChatPageState extends State<ChatPage> {
 
   @override
   Widget build(BuildContext context) {
+    if (_errorMessage != null) {
+      return Scaffold(
+        appBar: AppBar(title: Text(widget.otherUser)),
+        body: Center(
+          child: Text('Error: $_errorMessage'),
+        ),
+      );
+    }
+
     return Scaffold(
       appBar: AppBar(title: Text(widget.otherUser)),
       body: Column(
@@ -124,10 +131,9 @@ class _ChatPageState extends State<ChatPage> {
                         messages[index].data() as Map<String, dynamic>;
                     final isMe = message['sender'] == widget.currentUser;
                     final timestamp = message['timestamp'] as Timestamp?;
-                    final time =
-                        timestamp != null
-                            ? '${timestamp.toDate().hour}:${timestamp.toDate().minute.toString().padLeft(2, '0')}'
-                            : '';
+                    final time = timestamp != null
+                        ? '${timestamp.toDate().hour}:${timestamp.toDate().minute.toString().padLeft(2, '0')}'
+                        : '';
 
                     return Padding(
                       padding: const EdgeInsets.symmetric(
@@ -135,10 +141,9 @@ class _ChatPageState extends State<ChatPage> {
                         vertical: 4,
                       ),
                       child: Column(
-                        crossAxisAlignment:
-                            isMe
-                                ? CrossAxisAlignment.end
-                                : CrossAxisAlignment.start,
+                        crossAxisAlignment: isMe
+                            ? CrossAxisAlignment.end
+                            : CrossAxisAlignment.start,
                         children: [
                           Container(
                             constraints: BoxConstraints(
@@ -154,10 +159,9 @@ class _ChatPageState extends State<ChatPage> {
                               vertical: 10,
                             ),
                             child: Column(
-                              crossAxisAlignment:
-                                  isMe
-                                      ? CrossAxisAlignment.end
-                                      : CrossAxisAlignment.start,
+                              crossAxisAlignment: isMe
+                                  ? CrossAxisAlignment.end
+                                  : CrossAxisAlignment.start,
                               children: [
                                 Text(
                                   message['message'] as String,

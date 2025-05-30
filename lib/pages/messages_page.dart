@@ -6,14 +6,22 @@ import '../services/messageService.dart';
 
 class MessagesPage extends StatefulWidget {
   final LoginService loginService;
+  final FirebaseFirestore? firestore;
 
-  const MessagesPage({Key? key, required this.loginService}) : super(key: key);
+  const MessagesPage({
+    Key? key,
+    required this.loginService,
+    this.firestore,
+  }) : super(key: key);
 
   @override
   State<MessagesPage> createState() => _MessagesPageState();
 }
 
 class _MessagesPageState extends State<MessagesPage> {
+  FirebaseFirestore get _firestore =>
+      widget.firestore ?? FirebaseFirestore.instance;
+
   @override
   Widget build(BuildContext context) {
     final currentUserEmail = widget.loginService.getCurrentUser()?.email ?? '';
@@ -22,11 +30,10 @@ class _MessagesPageState extends State<MessagesPage> {
     return Scaffold(
       appBar: AppBar(title: const Text('Messages')),
       body: StreamBuilder<QuerySnapshot>(
-        stream:
-            FirebaseFirestore.instance
-                .collection('messages')
-                .orderBy('timestamp', descending: true)
-                .snapshots(),
+        stream: _firestore
+            .collection('messages')
+            .orderBy('timestamp', descending: true)
+            .snapshots(),
         builder: (context, snapshot) {
           if (snapshot.hasError) {
             print('Error in StreamBuilder: ${snapshot.error}');
@@ -75,10 +82,9 @@ class _MessagesPageState extends State<MessagesPage> {
                   lastMessage.data() as Map<String, dynamic>;
               final lastMessageText = lastMessageData['message'] as String;
               final timestamp = lastMessageData['timestamp'] as Timestamp?;
-              final time =
-                  timestamp != null
-                      ? '${timestamp.toDate().hour}:${timestamp.toDate().minute.toString().padLeft(2, '0')}'
-                      : '';
+              final time = timestamp != null
+                  ? '${timestamp.toDate().hour}:${timestamp.toDate().minute.toString().padLeft(2, '0')}'
+                  : '';
 
               return ListTile(
                 leading: const CircleAvatar(child: Icon(Icons.person)),
@@ -100,11 +106,10 @@ class _MessagesPageState extends State<MessagesPage> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder:
-                          (context) => ChatPage(
-                            currentUser: currentUserEmail,
-                            otherUser: partner,
-                          ),
+                      builder: (context) => ChatPage(
+                        currentUser: currentUserEmail,
+                        otherUser: partner,
+                      ),
                     ),
                   );
                 },

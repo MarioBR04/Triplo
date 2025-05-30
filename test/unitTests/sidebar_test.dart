@@ -27,10 +27,17 @@ void main() {
   setUp(() {
     mockLoginService = MockLoginService();
     navigator = MockNavigator();
-    when(
-      () => navigator.pushReplacementNamed('/login'),
-    ).thenAnswer((_) async {});
+
+    // Configurar el mock para pushReplacementNamed
+    when(() => navigator.pushReplacementNamed('/login'))
+        .thenAnswer((_) async {});
+
+    // Configurar el mock para canPop
     when(() => navigator.canPop()).thenReturn(true);
+
+    // Configurar el mock para push con cualquier argumento
+    when(() => navigator.push(any()))
+        .thenAnswer((_) async => Future<dynamic>.value());
   });
 
   Widget createWidgetUnderTest() {
@@ -65,9 +72,8 @@ void main() {
     expect(find.text('Sign Out'), findsOneWidget);
   });
 
-  testWidgets('Menu items close drawer when tapped', (
-    WidgetTester tester,
-  ) async {
+  testWidgets('Menu items close drawer when tapped',
+      (WidgetTester tester) async {
     await tester.pumpWidget(createWidgetUnderTest());
 
     // Tap each menu item and verify drawer closes
@@ -84,6 +90,7 @@ void main() {
     for (final item in menuItems) {
       await tester.tap(find.text(item));
       await tester.pumpAndSettle();
+      verify(() => navigator.push(any())).called(1);
     }
   });
 

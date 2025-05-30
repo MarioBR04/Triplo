@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# Activar lcov para Flutter
-flutter pub global activate coverage
+# Limpiar cobertura anterior
+rm -rf coverage
 
 # Ejecutar todas las pruebas con cobertura
 flutter test --coverage
@@ -11,6 +11,9 @@ genhtml coverage/lcov.info -o coverage/html
 
 # Mostrar resumen de cobertura
 lcov --summary coverage/lcov.info
+
+# Abrir el reporte en el navegador (macOS)
+open coverage/html/index.html
 
 # Ejecutar pruebas de rendimiento
 flutter test test/performance/app_perf_test.dart
